@@ -151,11 +151,11 @@ namespace CodeSwine_Solo_Public_Lobby {
 
         void ToggleInternetBtnColor() {
             if (internetRuleActive) {
-                btnEnableDisableInternet.Background = ColorBrush.Red;
+                btnEnableDisableInternet.Background = ColorBrush.Green;
                 lblInternet.Content = "Internet disabled" + Environment.NewLine + "Click to activate!";
             }
             else {
-                btnEnableDisableInternet.Background = ColorBrush.Green;
+                btnEnableDisableInternet.Background = ColorBrush.Red;
                 lblInternet.Content = "Internet enabled" + Environment.NewLine + "Click to deactivate!";
             }
         }

@@ -87,10 +87,10 @@
                 <Label x:Name="label" Content="Delete selected IP." Foreground="#FFFFFCFC" FontWeight="SemiBold"/>
             </StackPanel>
         </Button>
-        <Label x:Name="label3" Content="Hotkey: CTRL+F10 to toggle." HorizontalAlignment="Left" Margin="10,0,0,0" Grid.Row="3" VerticalAlignment="Top" Height="28" Width="276" FontWeight="Bold" Foreground="#FF707C80"/>
+        <Label x:Name="label3" Content="Hotkey: CTRL+F12 to toggle." HorizontalAlignment="Left" Margin="10,0,0,0" Grid.Row="3" VerticalAlignment="Top" Height="28" Width="276" FontWeight="Bold" Foreground="#FF707C80"/>
         <Label x:Name="lblAdmin" Content="Please start this program as administrator!" Foreground="Red" FontWeight="Bold" Visibility="Hidden" Grid.Column="1" HorizontalAlignment="Left" Margin="11,0,0,0" Grid.Row="3" VerticalAlignment="Top" RenderTransformOrigin="0.196,0.126"/>
 
-        <Button x:Name="btnEnableDisableInternet" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="2" VerticalAlignment="Top" Width="276" Height="120" RenderTransformOrigin="0.5,0.5" Foreground="White" Background="#FF28A745" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="18" FontWeight="SemiBold" BorderBrush="{x:Null}" Click="btnEnableDisableInternet_Click">
+        <Button x:Name="btnEnableDisableInternet" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="2" VerticalAlignment="Top" Width="276" Height="120" RenderTransformOrigin="0.5,0.5" Foreground="White" Background="#FFDC3545" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="18" FontWeight="SemiBold" BorderBrush="{x:Null}" Click="btnEnableDisableInternet_Click">
             <StackPanel Height="120" Width="273" Orientation="Horizontal">
                 <Label x:Name="lblInternet" Content="Internet enabled.&#xA;Click to deactivate!" Width="272" HorizontalAlignment="Left" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="#FFF7F5F5"/>
             </StackPanel>
