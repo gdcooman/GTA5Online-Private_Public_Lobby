@@ -1,6 +1,7 @@
 ﻿using CodeSwine_Solo_Public_Lobby.DataAccess;
 using CodeSwine_Solo_Public_Lobby.Helpers;
 using CodeSwine_Solo_Public_Lobby.Models;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,9 +14,8 @@ using System.Windows.Media.Imaging;
 namespace CodeSwine_Solo_Public_Lobby {
     public partial class MainWindow : Window {
         private IPTool iPTool = new IPTool();
-        private DaWhitelist whiteList = new DaWhitelist();
+        private SettingsLoader settingsLoader = new SettingsLoader();
         private List<IPAddress> addresses = new List<IPAddress>();
-        private MWhitelist mWhitelist = new MWhitelist();
 
         private bool lobbyRulesSet = false;
         private bool lobbyRulesActive = false;
@@ -34,21 +34,19 @@ namespace CodeSwine_Solo_Public_Lobby {
 
         void Init() {
             lblYourIPAddress.Content += " " + iPTool.IpAddress + ".";
-            addresses = DaWhitelist.ReadIPsFromJSON();
+            addresses = SettingsLoader.Settings.Ips;
             lsbAddresses.ItemsSource = addresses;
-            foreach (IPAddress ip in addresses) {
-                mWhitelist.Ips.Add(ip.ToString());
-            }
             SetIpCount();
         }
 
         private void btnAdd_Click(object sender, RoutedEventArgs e) {
             if (IPTool.ValidateIP(txbIpToAdd.Text)) {
-                if (!addresses.Contains(IPAddress.Parse(txbIpToAdd.Text))) {
-                    addresses.Add(IPAddress.Parse(txbIpToAdd.Text));
+                IPAddress newIp = IPAddress.Parse(txbIpToAdd.Text);
+                if (!addresses.Contains(newIp)) {
+                    addresses.Add(newIp);
                     lsbAddresses.Items.Refresh();
-                    mWhitelist.Ips.Add(txbIpToAdd.Text);
-                    DaWhitelist.SaveToJson(mWhitelist);
+                    //SettingsLoader.Settings.Ips.Add(newIp);
+                    settingsLoader.Save();
                     lobbyRulesSet = false; lobbyRulesActive = false;
                     internetRuleSet = false; internetRuleActive = false;
                     FirewallRule.DeleteRules();
@@ -60,10 +58,13 @@ namespace CodeSwine_Solo_Public_Lobby {
 
         private void btnDelete_Click(object sender, RoutedEventArgs e) {
             if (lsbAddresses.SelectedIndex != -1) {
-                mWhitelist.Ips.Remove(lsbAddresses.SelectedItem.ToString());
-                addresses.Remove(IPAddress.Parse(lsbAddresses.SelectedItem.ToString()));
+                IPAddress removedIp = (IPAddress)lsbAddresses.SelectedItem;
+
+                SettingsLoader.Settings.Ips.Remove(removedIp);
+                addresses.Remove(removedIp);
                 lsbAddresses.Items.Refresh();
-                DaWhitelist.SaveToJson(mWhitelist);
+                settingsLoader.Save();
+
                 lobbyRulesSet = false; lobbyRulesActive = false;
                 internetRuleSet = false; internetRuleActive = false;
                 FirewallRule.DeleteRules();
@@ -81,6 +82,14 @@ namespace CodeSwine_Solo_Public_Lobby {
         }
 
         private void btnEnableDisableInternet_Click(object sender, RoutedEventArgs e) {
+            if (string.IsNullOrEmpty(SettingsLoader.Settings.GTAVPath)) {
+                OpenFileDialog ofd = new OpenFileDialog();
+
+                if (ofd.ShowDialog() == true) {
+                    SettingsLoader.Settings.GTAVPath = ofd.FileName;
+                    settingsLoader.Save();
+                }
+            }
             ToggleInternet();
         }
 
@@ -117,19 +126,22 @@ namespace CodeSwine_Solo_Public_Lobby {
 
         void ToggleInternet() {
             if (!internetRuleSet) {
-                FirewallRule.CreateInternetBlockRule(true, false);
+                FirewallRule.CreateInternetBlockRuleOutbound(true, false);
+                FirewallRule.CreateInternetBlockRuleInbound(true, false);
                 internetRuleActive = true;
                 internetRuleSet = true;
                 ToggleInternetBtnColor();
             }
             else {
                 if (!internetRuleActive) {
-                    FirewallRule.CreateInternetBlockRule(true, true);
+                    FirewallRule.CreateInternetBlockRuleOutbound(true, true);
+                    FirewallRule.CreateInternetBlockRuleInbound(true, true);
                     internetRuleActive = true;
                     ToggleInternetBtnColor();
                 }
                 else {
-                    FirewallRule.CreateInternetBlockRule(false, true);
+                    FirewallRule.CreateInternetBlockRuleOutbound(false, true);
+                    FirewallRule.CreateInternetBlockRuleInbound(false, true);
                     internetRuleActive = false;
                     ToggleInternetBtnColor();
                 }
@@ -152,11 +164,11 @@ namespace CodeSwine_Solo_Public_Lobby {
         void ToggleInternetBtnColor() {
             if (internetRuleActive) {
                 btnEnableDisableInternet.Background = ColorBrush.Green;
-                lblInternet.Content = "Internet disabled" + Environment.NewLine + "Click to activate!";
+                lblInternet.Text = "Internet disabled" + Environment.NewLine + "Click to activate!";
             }
             else {
                 btnEnableDisableInternet.Background = ColorBrush.Red;
-                lblInternet.Content = "Internet enabled" + Environment.NewLine + "Click to deactivate!";
+                lblInternet.Text = "Internet enabled" + Environment.NewLine + "Click to deactivate!";
             }
         }
 

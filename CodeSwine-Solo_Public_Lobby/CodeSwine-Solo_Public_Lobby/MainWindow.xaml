@@ -91,9 +91,7 @@
         <Label x:Name="lblAdmin" Content="Please start this program as administrator!" Foreground="Red" FontWeight="Bold" Visibility="Hidden" Grid.Column="1" HorizontalAlignment="Left" Margin="11,0,0,0" Grid.Row="3" VerticalAlignment="Top" RenderTransformOrigin="0.196,0.126"/>
 
         <Button x:Name="btnEnableDisableInternet" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="2" VerticalAlignment="Top" Width="276" Height="120" RenderTransformOrigin="0.5,0.5" Foreground="White" Background="#FFDC3545" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="18" FontWeight="SemiBold" BorderBrush="{x:Null}" Click="btnEnableDisableInternet_Click">
-            <StackPanel Height="120" Width="273" Orientation="Horizontal">
-                <Label x:Name="lblInternet" Content="Internet enabled.&#xA;Click to deactivate!" Width="272" HorizontalAlignment="Left" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="#FFF7F5F5"/>
-            </StackPanel>
+                <TextBlock x:Name="lblInternet" Text="Internet enabled.&#xA;Click to deactivate!" Foreground="#FFF7F5F5" TextAlignment="Center" RenderTransformOrigin="1.095,1.519" VerticalAlignment="Center" HorizontalAlignment="Center"/>
         </Button>
     </Grid>
 </Window>
