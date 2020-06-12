@@ -96,6 +96,44 @@ namespace CodeSwine_Solo_Public_Lobby.Helpers
         }
 
         /// <summary>
+        /// Sets, Removes or Toggles CodeSwine Outbound firewall rule to block internet.
+        /// </summary>
+        /// <param name="enabled">True to enable, false to disable the rule.</param>
+        /// <param name="toggle">True to prevent adding or removing the rule again.</param>
+        public static void CreateInternetBlockRule(bool enabled, bool toggle)
+        {
+            try
+            {
+                INetFwRule firewallRule = (INetFwRule)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FWRule"));
+
+                firewallRule.Action = NET_FW_ACTION_.NET_FW_ACTION_BLOCK;
+                firewallRule.Enabled = enabled;
+                firewallRule.InterfaceTypes = "All";
+                firewallRule.Name = "GTA5 CodeSwine - Block internet";
+                firewallRule.Direction = NET_FW_RULE_DIRECTION_.NET_FW_RULE_DIR_OUT;
+                INetFwPolicy2 firewallPolicy = (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
+
+                if (!toggle)
+                {
+                    firewallPolicy.Rules.Add(firewallRule);
+                }
+                else
+                {
+                    firewallPolicy.Rules.Remove(firewallRule.Name);
+                    firewallPolicy.Rules.Add(firewallRule);
+                }
+
+            } catch (Exception e)
+            {
+                ErrorLogger.LogException(e);
+                if (lblAdmin != null)
+                    lblAdmin.Visibility = Visibility.Visible;
+                else
+                    MessageBox.Show("Please start this program as administrator!");
+            }
+        }
+
+        /// <summary>
         /// Removes CodeSwine Inbound & Outbound firewall rules at program startup.
         /// </summary>
         public static void DeleteRules()
@@ -106,11 +144,15 @@ namespace CodeSwine_Solo_Public_Lobby.Helpers
 
                 INetFwRule firewallRuleOutbound = (INetFwRule)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FWRule"));
                 firewallRuleOutbound.Name = "GTA5 CodeSwine - Private Public Lobby Outbound";
+                
+                INetFwRule firewallInternetBlockRule = (INetFwRule)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FWRule"));
+                firewallInternetBlockRule.Name = "GTA5 CodeSwine - Block internet";
 
                 INetFwPolicy2 firewallPolicy = (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
 
                 firewallPolicy.Rules.Remove(firewallRuleInbound.Name);
                 firewallPolicy.Rules.Remove(firewallRuleOutbound.Name);
+                firewallPolicy.Rules.Remove(firewallInternetBlockRule.Name);
             } catch (Exception e)
             {
                 ErrorLogger.LogException(e);
