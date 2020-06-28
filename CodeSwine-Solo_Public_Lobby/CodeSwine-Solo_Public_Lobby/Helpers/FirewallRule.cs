@@ -1,14 +1,10 @@
-﻿using CodeSwine_Solo_Public_Lobby.DataAccess;
-using NetFwTypeLib;
+﻿using NetFwTypeLib;
 using System;
-using System.Net;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace CodeSwine_Solo_Public_Lobby.Helpers
-{
-    public class FirewallRule
-    {
+namespace CodeSwine_Solo_Public_Lobby.Helpers {
+    public class FirewallRule {
         public static Label lblAdmin = null;
 
         /// <summary>
@@ -17,10 +13,8 @@ namespace CodeSwine_Solo_Public_Lobby.Helpers
         /// <param name="addresses">Scope to block.</param>
         /// <param name="enabled">True to enable, false to disable the rule.</param>
         /// <param name="toggle">True to prevent adding or removing the rule again.</param>
-        public static void CreateOutbound(string addresses, bool enabled, bool toggle)
-        {
-            try
-            {
+        public static void CreateOutbound(string addresses, bool enabled, bool toggle) {
+            try {
                 INetFwRule firewallRule = (INetFwRule)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FWRule"));
 
                 firewallRule.Action = NET_FW_ACTION_.NET_FW_ACTION_BLOCK;
@@ -33,18 +27,16 @@ namespace CodeSwine_Solo_Public_Lobby.Helpers
                 firewallRule.Direction = NET_FW_RULE_DIRECTION_.NET_FW_RULE_DIR_OUT;
                 INetFwPolicy2 firewallPolicy = (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
 
-                if (!toggle)
-                {
+                if (!toggle) {
                     firewallPolicy.Rules.Add(firewallRule);
                 }
-                else
-                {
+                else {
                     firewallPolicy.Rules.Remove(firewallRule.Name);
                     firewallPolicy.Rules.Add(firewallRule);
                 }
 
-            } catch (Exception e)
-            {
+            }
+            catch (Exception e) {
                 ErrorLogger.LogException(e);
                 if (lblAdmin != null)
                     lblAdmin.Visibility = Visibility.Visible;
@@ -59,21 +51,18 @@ namespace CodeSwine_Solo_Public_Lobby.Helpers
         /// <param name="addresses">Scope to block.</param>
         /// <param name="enabled">True to enable, false to disable the rule.</param>
         /// <param name="toggle">True to prevent adding or removing the rule again.</param>
-        public static void CreateInbound(string addresses, bool enabled, bool toggle)
-        {
-            try
-            {
+        public static void CreateInbound(string addresses, bool enabled, bool toggle) {
+            try {
                 INetFwRule firewallRule = (INetFwRule)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FWRule"));
 
                 firewallRule.Action = NET_FW_ACTION_.NET_FW_ACTION_BLOCK;
                 firewallRule.Protocol = 17;
                 firewallRule.Enabled = enabled;
                 firewallRule.InterfaceTypes = "All";
-                if(!string.IsNullOrEmpty(addresses))
-                {
+                if (!string.IsNullOrEmpty(addresses)) {
                     firewallRule.RemoteAddresses = addresses;
                 }
-                
+
                 Console.WriteLine(addresses);
 
                 firewallRule.LocalPorts = "6672";
@@ -81,18 +70,16 @@ namespace CodeSwine_Solo_Public_Lobby.Helpers
                 firewallRule.Direction = NET_FW_RULE_DIRECTION_.NET_FW_RULE_DIR_IN;
                 INetFwPolicy2 firewallPolicy = (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
 
-                if(!toggle)
-                {
+                if (!toggle) {
                     firewallPolicy.Rules.Add(firewallRule);
-                } else
-                {
+                }
+                else {
                     firewallPolicy.Rules.Remove(firewallRule.Name);
                     firewallPolicy.Rules.Add(firewallRule);
                 }
 
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 ErrorLogger.LogException(e);
             }
         }
@@ -103,32 +90,28 @@ namespace CodeSwine_Solo_Public_Lobby.Helpers
         /// <param name="addresses">Scope to block.</param>
         /// <param name="enabled">True to enable, false to disable the rule.</param>
         /// <param name="toggle">True to prevent adding or removing the rule again.</param>
-        public static void CreateInternetBlockRuleOutbound(bool enabled, bool toggle)
-        {
-            try
-            {
+        public static void CreateInternetBlockRuleOutbound(bool enabled, bool toggle) {
+            try {
                 INetFwRule firewallRule = (INetFwRule)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FWRule"));
 
                 firewallRule.Action = NET_FW_ACTION_.NET_FW_ACTION_BLOCK;
-                firewallRule.ApplicationName = @SettingsLoader.Settings.GTAVPath;
+                //firewallRule.ApplicationName = @SettingsLoader.Settings.GTAVPath;
                 firewallRule.Enabled = enabled;
                 firewallRule.InterfaceTypes = "All";
                 firewallRule.Name = "GTA5 CodeSwine - Block internet outbound";
                 firewallRule.Direction = NET_FW_RULE_DIRECTION_.NET_FW_RULE_DIR_OUT;
                 INetFwPolicy2 firewallPolicy = (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
 
-                if (!toggle)
-                {
+                if (!toggle) {
                     firewallPolicy.Rules.Add(firewallRule);
                 }
-                else
-                {
+                else {
                     firewallPolicy.Rules.Remove(firewallRule.Name);
                     firewallPolicy.Rules.Add(firewallRule);
                 }
 
-            } catch (Exception e)
-            {
+            }
+            catch (Exception e) {
                 ErrorLogger.LogException(e);
                 if (lblAdmin != null)
                     lblAdmin.Visibility = Visibility.Visible;
@@ -137,32 +120,28 @@ namespace CodeSwine_Solo_Public_Lobby.Helpers
             }
         }
 
-        public static void CreateInternetBlockRuleInbound(bool enabled, bool toggle)
-        {
-            try
-            {
+        public static void CreateInternetBlockRuleInbound(bool enabled, bool toggle) {
+            try {
                 INetFwRule firewallRule = (INetFwRule)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FWRule"));
 
                 firewallRule.Action = NET_FW_ACTION_.NET_FW_ACTION_BLOCK;
-                firewallRule.ApplicationName = @SettingsLoader.Settings.GTAVPath;
+                //firewallRule.ApplicationName = @SettingsLoader.Settings.GTAVPath;
                 firewallRule.Enabled = enabled;
                 firewallRule.InterfaceTypes = "All";
                 firewallRule.Name = "GTA5 CodeSwine - Block internet inbound";
                 firewallRule.Direction = NET_FW_RULE_DIRECTION_.NET_FW_RULE_DIR_IN;
                 INetFwPolicy2 firewallPolicy = (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
 
-                if (!toggle)
-                {
+                if (!toggle) {
                     firewallPolicy.Rules.Add(firewallRule);
                 }
-                else
-                {
+                else {
                     firewallPolicy.Rules.Remove(firewallRule.Name);
                     firewallPolicy.Rules.Add(firewallRule);
                 }
 
-            } catch (Exception e)
-            {
+            }
+            catch (Exception e) {
                 ErrorLogger.LogException(e);
                 if (lblAdmin != null)
                     lblAdmin.Visibility = Visibility.Visible;
@@ -174,29 +153,28 @@ namespace CodeSwine_Solo_Public_Lobby.Helpers
         /// <summary>
         /// Removes CodeSwine Inbound & Outbound firewall rules at program startup.
         /// </summary>
-        public static void DeleteRules()
-        {
+        public static void DeleteRules() {
             try {
                 INetFwRule firewallRuleInbound = (INetFwRule)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FWRule"));
                 firewallRuleInbound.Name = "GTA5 CodeSwine - Private Public Lobby Inbound";
 
                 INetFwRule firewallRuleOutbound = (INetFwRule)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FWRule"));
                 firewallRuleOutbound.Name = "GTA5 CodeSwine - Private Public Lobby Outbound";
-                
-                INetFwRule firewallInternetBlockRuleInbound = (INetFwRule)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FWRule"));
-                firewallInternetBlockRuleInbound.Name = "GTA5 CodeSwine - Block internet inbound";
 
-                INetFwRule firewallInternetBlockRuleOutbound = (INetFwRule)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FWRule"));
-                firewallInternetBlockRuleOutbound.Name = "GTA5 CodeSwine - Block internet outbound";
+                //INetFwRule firewallInternetBlockRuleInbound = (INetFwRule)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FWRule"));
+                //firewallInternetBlockRuleInbound.Name = "GTA5 CodeSwine - Block internet inbound";
+
+                //INetFwRule firewallInternetBlockRuleOutbound = (INetFwRule)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FWRule"));
+                //firewallInternetBlockRuleOutbound.Name = "GTA5 CodeSwine - Block internet outbound";
 
                 INetFwPolicy2 firewallPolicy = (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
 
                 firewallPolicy.Rules.Remove(firewallRuleInbound.Name);
                 firewallPolicy.Rules.Remove(firewallRuleOutbound.Name);
-                firewallPolicy.Rules.Remove(firewallInternetBlockRuleInbound.Name);
-                firewallPolicy.Rules.Remove(firewallInternetBlockRuleOutbound.Name);
-            } catch (Exception e)
-            {
+                //firewallPolicy.Rules.Remove(firewallInternetBlockRuleInbound.Name);
+                //firewallPolicy.Rules.Remove(firewallInternetBlockRuleOutbound.Name);
+            }
+            catch (Exception e) {
                 ErrorLogger.LogException(e);
                 if (lblAdmin != null)
                     lblAdmin.Visibility = Visibility.Visible;
@@ -205,4 +183,4 @@ namespace CodeSwine_Solo_Public_Lobby.Helpers
             }
         }
     }
-}   
+}

@@ -1,11 +1,10 @@
 ﻿using CodeSwine_Solo_Public_Lobby.DataAccess;
 using CodeSwine_Solo_Public_Lobby.Helpers;
-using CodeSwine_Solo_Public_Lobby.Models;
-using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
@@ -13,14 +12,14 @@ using System.Windows.Media.Imaging;
 
 namespace CodeSwine_Solo_Public_Lobby {
     public partial class MainWindow : Window {
-        private IPTool iPTool = new IPTool();
-        private SettingsLoader settingsLoader = new SettingsLoader();
-        private List<IPAddress> addresses = new List<IPAddress>();
+        private readonly IPTool _iPTool = new IPTool();
+        private readonly SettingsLoader _settingsLoader = new SettingsLoader();
+        private NetworkInterfaceItem _selectedNetworkInterface;
+        private List<IPAddress> _addresses = new List<IPAddress>();
+        private List<NetworkInterfaceItem> _nics;
 
-        private bool lobbyRulesSet = false;
-        private bool lobbyRulesActive = false;
-        private bool internetRuleSet = false;
-        private bool internetRuleActive = false;
+        private bool _lobbyRulesSet = false;
+        private bool _lobbyRulesActive = false;
 
         public MainWindow() {
             InitializeComponent();
@@ -32,23 +31,28 @@ namespace CodeSwine_Solo_Public_Lobby {
             Init();
         }
 
-        void Init() {
-            lblYourIPAddress.Content += " " + iPTool.IpAddress + ".";
-            addresses = SettingsLoader.Settings.Ips;
-            lsbAddresses.ItemsSource = addresses;
+        private void Init() {
+            lblYourIPAddress.Content += " " + _iPTool.IpAddress + ".";
+            _addresses = SettingsLoader.Settings.Ips;
+            lsbAddresses.ItemsSource = _addresses;
+
+            _nics = NetworkInterface.GetAllNetworkInterfaces().Select(ni => new NetworkInterfaceItem(ni)).ToList();
+            NicBox.ItemsSource = _nics;
+            // Had to use First here because the object in the nics array is not the same object as the one in the settings.
+            if (SettingsLoader.Settings.NetworkInterface != null)
+                NicBox.SelectedItem = _nics.First(ni => ni.NetworkInterface.Id == SettingsLoader.Settings.NetworkInterface.Id);
+
             SetIpCount();
         }
 
-        private void btnAdd_Click(object sender, RoutedEventArgs e) {
+        private void BtnAdd_Click(object sender, RoutedEventArgs e) {
             if (IPTool.ValidateIP(txbIpToAdd.Text)) {
                 IPAddress newIp = IPAddress.Parse(txbIpToAdd.Text);
-                if (!addresses.Contains(newIp)) {
-                    addresses.Add(newIp);
+                if (!_addresses.Contains(newIp)) {
+                    _addresses.Add(newIp);
                     lsbAddresses.Items.Refresh();
-                    //SettingsLoader.Settings.Ips.Add(newIp);
-                    settingsLoader.Save();
-                    lobbyRulesSet = false; lobbyRulesActive = false;
-                    internetRuleSet = false; internetRuleActive = false;
+                    _settingsLoader.Save();
+                    _lobbyRulesSet = false; _lobbyRulesActive = false;
                     FirewallRule.DeleteRules();
                     SetIpCount();
                     UpdateNotActive();
@@ -56,17 +60,16 @@ namespace CodeSwine_Solo_Public_Lobby {
             }
         }
 
-        private void btnDelete_Click(object sender, RoutedEventArgs e) {
+        private void BtnDelete_Click(object sender, RoutedEventArgs e) {
             if (lsbAddresses.SelectedIndex != -1) {
                 IPAddress removedIp = (IPAddress)lsbAddresses.SelectedItem;
 
                 SettingsLoader.Settings.Ips.Remove(removedIp);
-                addresses.Remove(removedIp);
+                _addresses.Remove(removedIp);
                 lsbAddresses.Items.Refresh();
-                settingsLoader.Save();
+                _settingsLoader.Save();
 
-                lobbyRulesSet = false; lobbyRulesActive = false;
-                internetRuleSet = false; internetRuleActive = false;
+                _lobbyRulesSet = false; _lobbyRulesActive = false;
                 FirewallRule.DeleteRules();
                 SetIpCount();
                 UpdateNotActive();
@@ -74,101 +77,89 @@ namespace CodeSwine_Solo_Public_Lobby {
         }
 
         private void SetIpCount() {
-            lblAmountIPs.Content = addresses.Count() + " IPs whitelisted!";
+            lblAmountIPs.Content = _addresses.Count() + " IPs whitelisted!";
         }
 
-        private void btnEnableDisable_Click(object sender, RoutedEventArgs e) {
+        private void BtnEnableDisable_Click(object sender, RoutedEventArgs e) {
             SetRules();
         }
 
-        private void btnEnableDisableInternet_Click(object sender, RoutedEventArgs e) {
-            if (string.IsNullOrEmpty(SettingsLoader.Settings.GTAVPath)) {
-                OpenFileDialog ofd = new OpenFileDialog();
-
-                if (ofd.ShowDialog() == true) {
-                    SettingsLoader.Settings.GTAVPath = ofd.FileName;
-                    settingsLoader.Save();
-                }
-            }
+        private void BtnEnableDisableInternet_Click(object sender, RoutedEventArgs e) {
             ToggleInternet();
         }
 
-        void SetRules() {
-            string remoteAddresses = RangeCalculator.GetRemoteAddresses(addresses);
+        private void NicBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e) {
+            _selectedNetworkInterface = (NetworkInterfaceItem)NicBox.SelectedItem;
+            ToggleInternetBtnColor();
+            SettingsLoader.Settings.NetworkInterface = _selectedNetworkInterface.NetworkInterface;
+            _settingsLoader.Save();
+        }
+
+        private void SetRules() {
+            string remoteAddresses = RangeCalculator.GetRemoteAddresses(_addresses);
 
             // If the firewall rules aren't set yet.
-            if (!lobbyRulesSet) {
+            if (!_lobbyRulesSet) {
                 FirewallRule.CreateInbound(remoteAddresses, true, false);
                 FirewallRule.CreateOutbound(remoteAddresses, true, false);
-                lobbyRulesActive = true;
-                lobbyRulesSet = true;
+                _lobbyRulesActive = true;
+                _lobbyRulesSet = true;
                 UpdateActive();
                 return;
             }
 
             // If they are set but not enabled.
-            if (lobbyRulesSet && !lobbyRulesActive) {
+            if (_lobbyRulesSet && !_lobbyRulesActive) {
                 FirewallRule.CreateInbound(remoteAddresses, true, true);
                 FirewallRule.CreateOutbound(remoteAddresses, true, true);
-                lobbyRulesActive = true;
+                _lobbyRulesActive = true;
                 UpdateActive();
                 return;
             }
 
             // If they are active and set.
-            if (lobbyRulesActive && lobbyRulesSet) {
+            if (_lobbyRulesActive && _lobbyRulesSet) {
                 FirewallRule.CreateInbound(remoteAddresses, false, true);
                 FirewallRule.CreateOutbound(remoteAddresses, false, true);
                 UpdateNotActive();
-                lobbyRulesActive = false;
+                _lobbyRulesActive = false;
             }
         }
 
-        void ToggleInternet() {
-            if (!internetRuleSet) {
-                FirewallRule.CreateInternetBlockRuleOutbound(true, false);
-                FirewallRule.CreateInternetBlockRuleInbound(true, false);
-                internetRuleActive = true;
-                internetRuleSet = true;
-                ToggleInternetBtnColor();
+        private void ToggleInternet() {
+            if (_selectedNetworkInterface.IsEnabled) {
+                _selectedNetworkInterface.Disable();
             }
             else {
-                if (!internetRuleActive) {
-                    FirewallRule.CreateInternetBlockRuleOutbound(true, true);
-                    FirewallRule.CreateInternetBlockRuleInbound(true, true);
-                    internetRuleActive = true;
-                    ToggleInternetBtnColor();
-                }
-                else {
-                    FirewallRule.CreateInternetBlockRuleOutbound(false, true);
-                    FirewallRule.CreateInternetBlockRuleInbound(false, true);
-                    internetRuleActive = false;
-                    ToggleInternetBtnColor();
-                }
+                _selectedNetworkInterface.Enable();
             }
-
+            ToggleInternetBtnColor();
         }
 
-        void UpdateNotActive() {
+        private void UpdateNotActive() {
             btnEnableDisable.Background = ColorBrush.Red;
+            btnEnableDisable.BorderBrush = ColorBrush.Red;
             image4.Source = new BitmapImage(new Uri("/CodeSwine-Solo_Public_Lobby;component/ImageResources/unlocked.png", UriKind.Relative));
             lblLock.Content = "Rules not active." + Environment.NewLine + "Click to activate!";
         }
 
-        void UpdateActive() {
+        private void UpdateActive() {
             btnEnableDisable.Background = ColorBrush.Green;
+            btnEnableDisable.BorderBrush = ColorBrush.Green;
             image4.Source = new BitmapImage(new Uri("/CodeSwine-Solo_Public_Lobby;component/ImageResources/locked.png", UriKind.Relative));
             lblLock.Content = "Rules active." + Environment.NewLine + "Click to deactivate!";
         }
 
-        void ToggleInternetBtnColor() {
-            if (internetRuleActive) {
-                btnEnableDisableInternet.Background = ColorBrush.Green;
-                lblInternet.Text = "Internet disabled" + Environment.NewLine + "Click to activate!";
+        private void ToggleInternetBtnColor() {
+            if (_selectedNetworkInterface.IsEnabled) {
+                btnEnableDisableInternet.Background = ColorBrush.Red;
+                btnEnableDisableInternet.BorderBrush = ColorBrush.Red;
+                lblInternet.Text = "Internet enabled" + Environment.NewLine + "Click to deactivate!";
             }
             else {
-                btnEnableDisableInternet.Background = ColorBrush.Red;
-                lblInternet.Text = "Internet enabled" + Environment.NewLine + "Click to deactivate!";
+                btnEnableDisableInternet.Background = ColorBrush.Green;
+                btnEnableDisableInternet.BorderBrush = ColorBrush.Green;
+                lblInternet.Text = "Internet disabled" + Environment.NewLine + "Click to activate!";
             }
         }
 
@@ -200,6 +191,9 @@ namespace CodeSwine_Solo_Public_Lobby {
             _source = null;
             UnregisterHotKey();
             FirewallRule.DeleteRules();
+            foreach (NetworkInterfaceItem nic in _nics) {
+                nic.Enable();
+            }
             base.OnClosed(e);
         }
 

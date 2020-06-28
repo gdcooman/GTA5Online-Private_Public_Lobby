@@ -25,7 +25,7 @@
 
         <!-- Row 1 & 2 -->
         <StackPanel Grid.Column="0" Grid.Row="1" Grid.RowSpan="3">
-            <Button x:Name="btnEnableDisable" Width="275" Height="100" RenderTransformOrigin="0.5,0.5" Foreground="White" Background="#FFDC3545" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="18" FontWeight="SemiBold" BorderBrush="#FFDC3545" Click="btnEnableDisable_Click" Margin="0,10,0,0">
+            <Button x:Name="btnEnableDisable" Width="275" Height="100" RenderTransformOrigin="0.5,0.5" Foreground="White" Background="#FFDC3545" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="18" FontWeight="SemiBold" BorderBrush="#FFDC3545" Click="BtnEnableDisable_Click" Margin="0,10,0,0">
                 <StackPanel Width="273" Orientation="Horizontal">
                     <Label x:Name="lblLock" Content="Rules not active.&#xA;Click to activate!" Width="193" HorizontalAlignment="Left" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="#FFF7F5F5"/>
                     <Image x:Name="image4" Width="100" Source="/CodeSwine-Solo_Public_Lobby;component/ImageResources/unlocked.png" RenderTransformOrigin="0.5,0.5">
@@ -42,11 +42,16 @@
             </Button>
             <StackPanel Margin="0,9,0,10">
                 <TextBlock Text="Network interface" Width="275" FontWeight="SemiBold" FontSize="14" />
-                <ComboBox Width="275">
+                <ComboBox x:Name="NicBox" Width="275" SelectionChanged="NicBox_SelectionChanged">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding NetworkInterface.Name}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
                 </ComboBox>
             </StackPanel>
 
-            <Button x:Name="btnEnableDisableInternet" Width="275" Height="100" RenderTransformOrigin="0.5,0.5" Foreground="White" Background="#FFDC3545" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="18" FontWeight="SemiBold" BorderBrush="#FFDC3545" Click="btnEnableDisableInternet_Click">
+            <Button x:Name="btnEnableDisableInternet" Width="275" Height="100" RenderTransformOrigin="0.5,0.5" Foreground="White" Background="#FFDC3545" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="18" FontWeight="SemiBold" BorderBrush="#FFDC3545" Click="BtnEnableDisableInternet_Click">
                 <TextBlock x:Name="lblInternet" Text="Internet enabled.&#xA;Click to deactivate!" Foreground="#FFF7F5F5" TextAlignment="Center" RenderTransformOrigin="1.095,1.519" VerticalAlignment="Center" HorizontalAlignment="Center"/>
             </Button>
         </StackPanel>
@@ -68,7 +73,7 @@
                 </StackPanel>
             </Label>
             <ListBox x:Name="lsbAddresses" Height="183" Width="275"/>
-            <Button x:Name="btnDelete" Width="275" Height="40" FontSize="18" Foreground="#FFFDFDFD" Background="#FFDC3545" BorderBrush="#DC3545" Click="btnDelete_Click">
+            <Button x:Name="btnDelete" Width="275" Height="40" FontSize="18" Foreground="#FFFDFDFD" Background="#FFDC3545" BorderBrush="#DC3545" Click="BtnDelete_Click">
                 <StackPanel Height="40" Width="273" Orientation="Horizontal">
                     <Image x:Name="image3" Width="38" Source="ImageResources/trash.png" Margin="0,4,0,8"/>
                     <Label x:Name="label" Content="Delete selected IP." Foreground="#FFFFFCFC" FontWeight="SemiBold"/>
@@ -78,7 +83,7 @@
 
         <StackPanel Grid.Column="2" Grid.Row="1" Grid.RowSpan="3">
             <TextBox x:Name="txbIpToAdd" Height="72" TextWrapping="Wrap" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Text="192.0.0.1" Foreground="#FF707C80" FontWeight="Bold" FontSize="18" Margin="15,10,15,0"/>
-            <Button x:Name="btnAdd" Width="275" Height="50" FontSize="18" BorderBrush="#FFC107" Background="#FFFFC107" Foreground="#FFF7F7F7" FontWeight="SemiBold" Click="btnAdd_Click">
+            <Button x:Name="btnAdd" Width="275" Height="50" FontSize="18" BorderBrush="#FFC107" Background="#FFFFC107" Foreground="#FFF7F7F7" FontWeight="SemiBold" Click="BtnAdd_Click">
                 <StackPanel Height="33" Width="275" Orientation="Horizontal">
                     <Label x:Name="label1" Content="Add IP" Foreground="#FFF0F0F0" HorizontalAlignment="Center" VerticalContentAlignment="Center" Width="213" HorizontalContentAlignment="Center"/>
                     <Image x:Name="image1" Source="/CodeSwine-Solo_Public_Lobby;component/ImageResources/add.png" Width="82" RenderTransformOrigin="0.5,0.5" Margin="0,4,0,0"/>

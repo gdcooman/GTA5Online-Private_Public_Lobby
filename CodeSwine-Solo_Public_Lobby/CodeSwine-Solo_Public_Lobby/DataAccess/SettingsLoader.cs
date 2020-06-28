@@ -1,4 +1,4 @@
-﻿using CodeSwine_Solo_Public_Lobby.Helpers;
+﻿using CodeSwine_Solo_Public_Lobby.DataAccess.JsonConverters;
 using CodeSwine_Solo_Public_Lobby.Models;
 using Newtonsoft.Json;
 using System;
@@ -22,18 +22,17 @@ namespace CodeSwine_Solo_Public_Lobby.DataAccess {
             }
             else {
                 Settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText(_path), _jsonSettings);
-                //Settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText(_path));
             }
         }
 
         public void Save() {
             File.WriteAllText(_path, JsonConvert.SerializeObject(Settings, _jsonSettings));
-            //File.WriteAllText(_path, JsonConvert.SerializeObject(Settings));
         }
 
         private JsonSerializerSettings GenerateJsonSettings() {
             var settings = new JsonSerializerSettings();
             settings.Converters.Add(new IPAddressConverter());
+            settings.Converters.Add(new NetworkInterfaceConverter());
             settings.Formatting = Formatting.Indented;
             return settings;
         }
