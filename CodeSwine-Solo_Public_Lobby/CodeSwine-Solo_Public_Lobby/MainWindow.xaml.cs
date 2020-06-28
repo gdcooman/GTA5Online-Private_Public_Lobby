@@ -127,13 +127,15 @@ namespace CodeSwine_Solo_Public_Lobby {
         }
 
         private void ToggleInternet() {
-            if (_selectedNetworkInterface.IsEnabled) {
-                _selectedNetworkInterface.Disable();
+            if (_selectedNetworkInterface != null) {
+                if (_selectedNetworkInterface.IsEnabled) {
+                    _selectedNetworkInterface.Disable();
+                }
+                else {
+                    _selectedNetworkInterface.Enable();
+                }
+                ToggleInternetBtnColor();
             }
-            else {
-                _selectedNetworkInterface.Enable();
-            }
-            ToggleInternetBtnColor();
         }
 
         private void UpdateNotActive() {
